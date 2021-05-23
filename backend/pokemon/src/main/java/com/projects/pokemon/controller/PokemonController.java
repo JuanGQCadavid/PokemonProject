@@ -40,8 +40,12 @@ public class PokemonController {
         Integer startPointInt = Integer.valueOf(startPoint);
         Integer packageSizeInt = Integer.valueOf(packageSize);
 
+        try {
+            return new ResponseEntity( pokemonService.fetchCards(startPointInt, packageSizeInt), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
 
-        return new ResponseEntity( pokemonService.fetchCards(startPointInt, packageSizeInt), HttpStatus.OK);
     }
 
 
