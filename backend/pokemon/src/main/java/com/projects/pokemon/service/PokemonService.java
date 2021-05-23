@@ -21,20 +21,12 @@ public class PokemonService {
 
     public List<PokemonCardInfo> fetchCards(Integer startPoint, Integer packageSize) throws IOException {
 
-        PokemonCardInfo cardInfo = new PokemonCardInfo();
-        cardInfo.setPokeId(1);
-
-        ArrayList arrayList = new ArrayList();
-        arrayList.add(cardInfo);
-
         Response<PokeApiPokemonResponse> responseCall = externalPokeApi.getPokemon(startPoint,packageSize).execute();
 
         if (!responseCall.isSuccessful()){
             // ERROR !
             return null;
         }
-
-        System.out.println(responseCall.body());
 
         return responseCall.body()
                     .getResults()
