@@ -1,4 +1,5 @@
 package com.projects.pokemon.model.pokemon;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -8,6 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class PokemonEvolutions {
-    private PokemonEvolution pokemonEvolution;
+public class PokemonStat {
+    private String name;
+    private Integer value;
 }

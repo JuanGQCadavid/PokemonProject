@@ -1,6 +1,7 @@
 package com.projects.pokemon.model;
 
 import com.projects.pokemon.model.pokemon.PokemonBasicInfo;
+import com.projects.pokemon.model.pokemon.PokemonDescription;
 import com.projects.pokemon.model.pokemon.PokemonEvolutions;
 import com.projects.pokemon.model.pokemon.PokemonMedia;
 import lombok.AllArgsConstructor;
@@ -14,7 +15,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class PokemonExpandedInfo {
     private Integer pokeId;
-    private String description;
+    private PokemonDescription description;
     private PokemonBasicInfo pokemonBasicInfo;
     private PokemonMedia pokemonMedia;
     private PokemonEvolutions pokemonEvolutions;

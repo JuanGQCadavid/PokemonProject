@@ -1,6 +1,7 @@
 package com.projects.pokemon.controller;
 
 import com.projects.pokemon.model.PokemonCardInfo;
+import com.projects.pokemon.model.PokemonExpandedInfo;
 import com.projects.pokemon.service.PokemonService;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -47,6 +49,21 @@ public class PokemonController {
         }
 
     }
+
+    @GetMapping("/{name}")
+    public ResponseEntity<PokemonExpandedInfo> fetchPokemonExpandedInfo (@PathVariable(required = true) String name){
+        log.info(String.format("POKEMON | GET | POKEMON EXPANDED | NAME -> %s  ", name));
+
+        // We need to check the name
+        try {
+            return new ResponseEntity( pokemonService.fetchPokemon(name), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+
 
 
 }

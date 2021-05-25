@@ -16,7 +16,4 @@ public class PokemonCardInfo {
     private Integer pokeId;
     private PokemonBasicInfo pokemonBasicInfo;
     private PokemonMedia pokemonMedia;
-
-
-
 }
