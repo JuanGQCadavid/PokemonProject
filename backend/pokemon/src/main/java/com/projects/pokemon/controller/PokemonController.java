@@ -1,6 +1,9 @@
 package com.projects.pokemon.controller;
 
 import com.projects.pokemon.exception.BadRequestParamsException;
+import com.projects.pokemon.exception.ErrorMessage;
+import com.projects.pokemon.exception.GeneralException;
+import com.projects.pokemon.exception.GeneralExceptionParams;
 import com.projects.pokemon.model.PokemonCardInfo;
 import com.projects.pokemon.model.PokemonExpandedInfo;
 import com.projects.pokemon.service.PokemonService;
