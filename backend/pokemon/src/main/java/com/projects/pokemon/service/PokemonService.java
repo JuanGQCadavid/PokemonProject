@@ -16,6 +16,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.projects.pokemon.mappers.PokeApiMapper.pokeApiFullToPokemonExpandedInfo;
+
 @Slf4j
 @Service
 public class PokemonService {
@@ -66,6 +68,10 @@ public class PokemonService {
             PokeApiPokemonEvolutionChain evolutionChain = responseTwo.body();
 
             System.out.println(evolutionChain);
+
+
+
+            return pokeApiFullToPokemonExpandedInfo(pokeApiPokemonFullInfoResponse, species, evolutionChain);
 
 
         } catch (IOException e) {
