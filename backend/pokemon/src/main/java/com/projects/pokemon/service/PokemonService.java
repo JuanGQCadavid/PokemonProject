@@ -1,5 +1,8 @@
 package com.projects.pokemon.service;
 
+import com.projects.pokemon.exception.PokeApiIOException;
+import com.projects.pokemon.exception.PokeApiNotFoundException;
+import com.projects.pokemon.exception.PokeApiNotSuccessfulResponseException;
 import com.projects.pokemon.mappers.PokeApiMapper;
 import com.projects.pokemon.model.PokemonCardInfo;
 import com.projects.pokemon.model.PokemonExpandedInfo;
@@ -9,6 +12,7 @@ import com.projects.pokemon.model.pokeApiService.response.PokeApiPokemonResponse
 import com.projects.pokemon.model.pokeApiService.response.PokeApiPokemonSpecies;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import retrofit2.Response;
 
@@ -43,8 +47,7 @@ public class PokemonService {
             Response<PokeApiPokemonSpecies> response = externalPokeApi.getPokemonSpecie(pokeApiPokemonFullInfoResponse.getId()).execute();
 
             if (!response.isSuccessful()){
-                // ERROR !
-                return null;
+                throw new PokeApiNotSuccessfulResponseException(response.errorBody().string());
             }
 
             PokeApiPokemonSpecies species = response.body();
@@ -61,8 +64,7 @@ public class PokemonService {
             Response<PokeApiPokemonEvolutionChain> responseTwo = externalPokeApi.getPokemonEvolution(evolutionChainId).execute();
 
             if (!responseTwo.isSuccessful()){
-                // ERROR !
-                return null;
+                throw new PokeApiNotSuccessfulResponseException(response.errorBody().string());
             }
 
             PokeApiPokemonEvolutionChain evolutionChain = responseTwo.body();
@@ -75,14 +77,8 @@ public class PokemonService {
 
 
         } catch (IOException e) {
-            log.error("DUDE");
-
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
+            throw new PokeApiIOException(e.getMessage());
         }
-
-        return PokemonExpandedInfo.builder().build();
 
     }
 
@@ -91,9 +87,8 @@ public class PokemonService {
     public PokeApiPokemonResponse fetchPokemonList (Integer startPoint, Integer packageSize) {
         try {
             return fetchPokemonListFromPokeApi(startPoint, packageSize);
-        } catch (Exception e) {
-            // Ups
-            return null;
+        } catch (IOException e) {
+            throw new PokeApiIOException(e.getMessage());
         }
     }
 
@@ -102,8 +97,8 @@ public class PokemonService {
                 externalPokeApi.getPokemon(startPoint,packageSize).execute();
 
         if (!response.isSuccessful()){
-            // ERROR !
-            return null;
+
+            throw new PokeApiNotSuccessfulResponseException(response.errorBody().string());
         }
         return response.body();
     }
@@ -111,9 +106,8 @@ public class PokemonService {
     public PokeApiPokemonFullInfoResponse fetchPokemonFullInfo (String pokeName) {
         try {
             return fetchPokemonFullInfoFromPokeApi(pokeName);
-        } catch (Exception e) {
-            // Ups
-            return null;
+        } catch (IOException e) {
+            throw new PokeApiIOException(e.getMessage());
         }
     }
 
@@ -121,8 +115,12 @@ public class PokemonService {
         Response<PokeApiPokemonFullInfoResponse> response =
                 externalPokeApi.getPokemonByName(pokeName).execute();
         if (!response.isSuccessful()){
-            // ERROR !
-            return null;
+
+            log.error(String.valueOf(response.code()));
+            if (response.code() == HttpStatus.NOT_FOUND.value())
+                throw new PokeApiNotFoundException(pokeName);
+
+            throw new PokeApiNotSuccessfulResponseException(response.errorBody().string());
         }
         return response.body();
     }

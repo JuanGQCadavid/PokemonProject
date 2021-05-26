@@ -2,7 +2,7 @@ package com.projects.pokemon.exception;
 
 import org.springframework.http.HttpStatus;
 
-import static com.projects.pokemon.PokemonConstants.MISSING_FIELDS;
+import static com.projects.pokemon.util.PokemonConstants.MISSING_FIELDS;
 
 public class MissingValuesException extends GeneralException {
     public MissingValuesException(Object Payload) {

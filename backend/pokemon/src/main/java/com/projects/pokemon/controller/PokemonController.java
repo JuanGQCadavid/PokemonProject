@@ -1,5 +1,6 @@
 package com.projects.pokemon.controller;
 
+import com.projects.pokemon.exception.BadRequestParamsException;
 import com.projects.pokemon.model.PokemonCardInfo;
 import com.projects.pokemon.model.PokemonExpandedInfo;
 import com.projects.pokemon.service.PokemonService;
@@ -16,8 +17,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
-import static com.projects.pokemon.PokemonConstants.DEFAULT_CONTROLLER_GET_LIMIT_VALUE;
-import static com.projects.pokemon.PokemonConstants.DEFAULT_CONTROLLER_GET_START_VALUE;
+import static com.projects.pokemon.util.PokemonConstants.DEFAULT_CONTROLLER_GET_LIMIT_VALUE;
+import static com.projects.pokemon.util.PokemonConstants.DEFAULT_CONTROLLER_GET_START_VALUE;
+import static com.projects.pokemon.util.Validators.isValidNumber;
 
 @RequestMapping("/api/v1/pokemon")
 @Controller
@@ -38,32 +40,17 @@ public class PokemonController {
     ){
         log.info(String.format("POKEMON | GET | POKEMON CARDS | START -> %s , SIZE -> %s ", startPoint, packageSize));
 
-        // we need to handle bad type on start point and package size
-        Integer startPointInt = Integer.valueOf(startPoint);
-        Integer packageSizeInt = Integer.valueOf(packageSize);
-
-        try {
-            return new ResponseEntity( pokemonService.fetchCards(startPointInt, packageSizeInt), HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        if (!isValidNumber(startPoint) || !isValidNumber(packageSize)) {
+            throw new BadRequestParamsException();
         }
 
+        return new ResponseEntity( pokemonService.fetchCards(Integer.valueOf(startPoint), Integer.valueOf(packageSize)), HttpStatus.OK);
     }
 
     @GetMapping("/{name}")
     public ResponseEntity<PokemonExpandedInfo> fetchPokemonExpandedInfo (@PathVariable(required = true) String name){
         log.info(String.format("POKEMON | GET | POKEMON EXPANDED | NAME -> %s  ", name));
 
-        // We need to check the name
-        try {
-            return new ResponseEntity( pokemonService.fetchPokemon(name), HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new ResponseEntity( pokemonService.fetchPokemon(name), HttpStatus.OK);
     }
-
-
-
-
-
 }
