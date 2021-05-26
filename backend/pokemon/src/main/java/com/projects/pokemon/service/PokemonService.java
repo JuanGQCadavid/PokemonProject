@@ -1,8 +1,13 @@
 package com.projects.pokemon.service;
 
-import com.projects.pokemon.exception.PokeApiIOException;
-import com.projects.pokemon.exception.PokeApiNotFoundException;
-import com.projects.pokemon.exception.PokeApiNotSuccessfulResponseException;
+import com.projects.pokemon.commands.FetchPokemonEvolutionCommand;
+import com.projects.pokemon.commands.FetchPokemonFullInfoCommand;
+import com.projects.pokemon.commands.FetchPokemonListCommand;
+import com.projects.pokemon.commands.FetchPokemonSpecieCommand;
+import com.projects.pokemon.commands.receivers.FetchPokemonEvolutionReceiver;
+import com.projects.pokemon.commands.receivers.FetchPokemonFullInfoReceiver;
+import com.projects.pokemon.commands.receivers.FetchPokemonListReceiver;
+import com.projects.pokemon.commands.receivers.FetchPokemonSpecieReceiver;
 import com.projects.pokemon.mappers.PokeApiMapper;
 import com.projects.pokemon.model.PokemonCardInfo;
 import com.projects.pokemon.model.PokemonExpandedInfo;
@@ -12,11 +17,8 @@ import com.projects.pokemon.model.pokeApiService.response.PokeApiPokemonResponse
 import com.projects.pokemon.model.pokeApiService.response.PokeApiPokemonSpecies;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import retrofit2.Response;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,102 +30,63 @@ public class PokemonService {
     @Autowired
     private PokeApi externalPokeApi;
 
+    @Autowired
+    private FetchPokemonListReceiver fetchPokemonListReceiver;
+
+    @Autowired
+    private FetchPokemonFullInfoReceiver fetchPokemonFullInfoReceiver;
+
+    @Autowired
+    private FetchPokemonSpecieReceiver specieReceiver;
+
+    @Autowired
+    private FetchPokemonEvolutionReceiver evolutionReceiver;
+    
     public List<PokemonCardInfo> fetchCards(Integer startPoint, Integer packageSize)  {
 
-        PokeApiPokemonResponse pokeApiPokemonResponse=  fetchPokemonList(startPoint, packageSize);
+        FetchPokemonListCommand commandList = new FetchPokemonListCommand(startPoint, packageSize, fetchPokemonListReceiver);
+        PokeApiPokemonResponse pokeApiPokemonResponse =  commandList.execute().getResult();
 
         return pokeApiPokemonResponse
                     .getResults()
                     .stream()
-                        .map(pokeApiPokemonShortInfoResponse -> fetchPokemonFullInfo(pokeApiPokemonShortInfoResponse.getName()))
+                        .map(pokeApiPokemonShortInfoResponse -> new FetchPokemonFullInfoCommand(pokeApiPokemonShortInfoResponse.getName(), fetchPokemonFullInfoReceiver)
+                                .execute()
+                                .getResult()
+                        )
                         .map(PokeApiMapper::pokeApiFullToPokemonCard)
                         .collect(Collectors.toList());
     }
 
     public PokemonExpandedInfo fetchPokemon(String name) {
-        PokeApiPokemonFullInfoResponse pokeApiPokemonFullInfoResponse = fetchPokemonFullInfo(name);
+        FetchPokemonFullInfoCommand fetchPokemonFullInfoCommand =
+                new FetchPokemonFullInfoCommand(name, fetchPokemonFullInfoReceiver);
 
-        try {
-            Response<PokeApiPokemonSpecies> response = externalPokeApi.getPokemonSpecie(pokeApiPokemonFullInfoResponse.getId()).execute();
+        PokeApiPokemonFullInfoResponse pokeApiPokemonFullInfoResponse = fetchPokemonFullInfoCommand.execute().getResult();
 
-            if (!response.isSuccessful()){
-                throw new PokeApiNotSuccessfulResponseException(response.errorBody().string());
-            }
+        FetchPokemonSpecieCommand fetchPokemonSpecieCommand =
+                new FetchPokemonSpecieCommand(pokeApiPokemonFullInfoResponse.getId(), specieReceiver);
 
-            PokeApiPokemonSpecies species = response.body();
+        PokeApiPokemonSpecies species = fetchPokemonSpecieCommand.execute().getResult();
 
-            System.out.println(species);
+        Integer evolutionChainId = getEvolutionId(species.getEvolution_chain().getUrl());
 
-            String [] s = species.getEvolution_chain().getUrl().split("/");
+        FetchPokemonEvolutionCommand evolutionCommand =
+                new FetchPokemonEvolutionCommand(evolutionChainId, evolutionReceiver);
 
-            Integer evolutionChainId = Integer.valueOf(s[s.length - 1 ]) ;
+        PokeApiPokemonEvolutionChain evolutionChain = evolutionCommand.execute().getResult();
 
-            log.info("Evolution chain id ->" + String.valueOf(evolutionChainId));
-
-
-            Response<PokeApiPokemonEvolutionChain> responseTwo = externalPokeApi.getPokemonEvolution(evolutionChainId).execute();
-
-            if (!responseTwo.isSuccessful()){
-                throw new PokeApiNotSuccessfulResponseException(response.errorBody().string());
-            }
-
-            PokeApiPokemonEvolutionChain evolutionChain = responseTwo.body();
-
-            System.out.println(evolutionChain);
-
-
-
-            return pokeApiFullToPokemonExpandedInfo(pokeApiPokemonFullInfoResponse, species, evolutionChain);
-
-
-        } catch (IOException e) {
-            throw new PokeApiIOException(e.getMessage());
-        }
-
+        return pokeApiFullToPokemonExpandedInfo(pokeApiPokemonFullInfoResponse, species, evolutionChain);
     }
 
-    // Lets use the command pattern
+    private Integer getEvolutionId(String url){
+        String [] urlSplit = url.split("/");
 
-    public PokeApiPokemonResponse fetchPokemonList (Integer startPoint, Integer packageSize) {
-        try {
-            return fetchPokemonListFromPokeApi(startPoint, packageSize);
-        } catch (IOException e) {
-            throw new PokeApiIOException(e.getMessage());
-        }
+        Integer evolutionChainId = Integer.valueOf(urlSplit[urlSplit.length - 1 ]) ;
+
+        log.info("Evolution chain id ->" + String.valueOf(evolutionChainId));
+
+        return evolutionChainId;
     }
-
-    private PokeApiPokemonResponse fetchPokemonListFromPokeApi (Integer startPoint, Integer packageSize) throws IOException {
-        Response<PokeApiPokemonResponse> response =
-                externalPokeApi.getPokemon(startPoint,packageSize).execute();
-
-        if (!response.isSuccessful()){
-
-            throw new PokeApiNotSuccessfulResponseException(response.errorBody().string());
-        }
-        return response.body();
-    }
-
-    public PokeApiPokemonFullInfoResponse fetchPokemonFullInfo (String pokeName) {
-        try {
-            return fetchPokemonFullInfoFromPokeApi(pokeName);
-        } catch (IOException e) {
-            throw new PokeApiIOException(e.getMessage());
-        }
-    }
-
-    private PokeApiPokemonFullInfoResponse fetchPokemonFullInfoFromPokeApi (String pokeName) throws IOException {
-        Response<PokeApiPokemonFullInfoResponse> response =
-                externalPokeApi.getPokemonByName(pokeName).execute();
-        if (!response.isSuccessful()){
-
-            log.error(String.valueOf(response.code()));
-            if (response.code() == HttpStatus.NOT_FOUND.value())
-                throw new PokeApiNotFoundException(pokeName);
-
-            throw new PokeApiNotSuccessfulResponseException(response.errorBody().string());
-        }
-        return response.body();
-    }
-
 
 }
