@@ -11,6 +11,16 @@
         GET /api/v1/pokemon/?start=<Number>&size=<Number>
         GET /api/v1/pokemon/<pokeId>
 
+    Examples
+
+        http://18.198.197.44:8080/swagger-ui.html
+        http://18.198.197.44:8080/api/v1/pokemon/
+        http://18.198.197.44:8080/api/v1/pokemon/?start=10&size=20
+        http://18.198.197.44:8080/api/v1/pokemon/5
+        
+
+
+
 ## Deployment
 
 ### Containerization
