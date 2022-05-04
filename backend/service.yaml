@@ -5,7 +5,7 @@
   spec:
     type: LoadBalancer
     selector:
-      app: pokemon
+      run: pokemon-pod
     ports:
     - protocol: TCP
       port: 8080
