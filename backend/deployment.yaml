@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pokemon-deployment
+  labels:
+    app: pokemon
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pokemon
+  template:
+    metadata:
+      labels:
+        app: pokemon
+    spec:
+      containers:
+      - name: pokemon
+        image: public.ecr.aws/n0k6p9r4/pokemon-service:latest
+        #imagePullPolicy: Never
+        ports:
+          - containerPort: 8080
