@@ -20,6 +20,7 @@ import java.util.List;
 import static com.projects.pokemon.util.PokemonConstants.DEFAULT_CONTROLLER_GET_LIMIT_VALUE;
 import static com.projects.pokemon.util.PokemonConstants.DEFAULT_CONTROLLER_GET_START_VALUE;
 import static com.projects.pokemon.util.Validators.isValidNumber;
+import org.springframework.beans.factory.annotation.Value;
 
 @RequestMapping("/api/v1/pokemon")
 @Controller
@@ -28,6 +29,9 @@ public class PokemonController {
 
     @Autowired
     PokemonService pokemonService;
+
+    @Value("${config.map}")  
+    private String configMapTest;
 
     @ApiOperation(
             value = "FETCH POKEMON'S CARDS",
@@ -52,5 +56,12 @@ public class PokemonController {
         log.info(String.format("POKEMON | GET | POKEMON EXPANDED | NAME -> %s  ", name));
 
         return new ResponseEntity( pokemonService.fetchPokemon(name), HttpStatus.OK);
+    }
+
+    @GetMapping("/config")
+    public ResponseEntity<String> config (){
+        log.info(String.format("POKEMON | GET | POKEMON CONFIG "));
+
+        return new ResponseEntity( configMapTest, HttpStatus.OK);
     }
 }
