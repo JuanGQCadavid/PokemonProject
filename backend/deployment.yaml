@@ -16,7 +16,13 @@ spec:
     spec:
       containers:
       - name: pokemon
-        image: public.ecr.aws/n0k6p9r4/pokemon-service:latest
-        #imagePullPolicy: Never
+        image: pokemon-service:latest
+        env:
+          - name: CONFIG_MAP
+            valueFrom:
+              configMapKeyRef:
+                name: pokemon-config
+                key: config.map
+        imagePullPolicy: Never
         ports:
           - containerPort: 8080
