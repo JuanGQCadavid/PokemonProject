@@ -1,11 +1,19 @@
-# Build step
-FROM maven:3.6.0-jdk-11-slim AS build
-COPY ./pokemon/src /home/app/src
-COPY ./pokemon/pom.xml /home/app
-RUN mvn -f /home/app/pom.xml clean package
-
-# Package  stage
 FROM openjdk:11-jre-slim
-COPY  --from=build /home/app/target/pokemon-0.0.1-SNAPSHOT.jar /usr/local/lib/pokemon.jar
+
+WORKDIR /app
 EXPOSE 8080
-ENTRYPOINT ["java","-jar","/usr/local/lib/pokemon.jar"]
+
+COPY ./scripts/start.sh . 
+
+
+#RUN chmod -R 777 /app 
+#RUN groupadd -g 1000 java; useradd -g java -u 1000 java -d /app
+
+RUN chmod -R 777 /app \
+    && groupadd -g 1000 java \
+    && useradd -g java -u 1000 java -d /app
+
+
+COPY ./pokemon/target/pokemon-*.jar app.jar
+
+USER java
