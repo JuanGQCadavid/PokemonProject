@@ -17,6 +17,8 @@ spec:
       containers:
       - name: pokemon
         image: pokemon-service:latest
+        command: ["/bin/sh"]
+        args: ["-c", "/app/start.sh"]
         env:
           - name: CONFIG_MAP
             valueFrom:

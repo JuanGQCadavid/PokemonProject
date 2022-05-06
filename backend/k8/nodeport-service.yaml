@@ -7,7 +7,7 @@ metadata:
 spec:
   type: NodePort
   selector: 
-    run: 
+    app: pokemon
   ports:
     - protocol: TCP
       port: 8080

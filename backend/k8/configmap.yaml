@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: config.map
+  name: pokemon-config
   namespace: default
 data:
   config.map: config map test

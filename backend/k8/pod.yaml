@@ -6,6 +6,6 @@ metadata:
 spec:
   containers:
     - name: pokemon-api-container
-      image: jquirozcadavid/pokeapi:amd64
+      image: pokemon-service
       ports:
         - containerPort: 8080
