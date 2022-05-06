@@ -1,9 +1,10 @@
 
 
-alias k="kubectl"
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+cd $SCRIPT_DIR/../../
 
-k apply -f k8/configmap.yaml
+kubectl apply -f k8/configmap.yaml
 
-k apply -f k8/deployment.yaml
+kubectl apply -f k8/deployment.yaml
 
-k apply -f k8/nodeport-service.yaml
+kubectl apply -f k8/nodeport-service.yaml

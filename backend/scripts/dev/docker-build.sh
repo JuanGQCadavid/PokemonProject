@@ -1,4 +1,9 @@
 
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+cd $SCRIPT_DIR/../../
+
+
 # This will generate the java package.
 docker run -it --rm  \
     -v ${PWD}/pokemon:/usr/src/pokemon \
